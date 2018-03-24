@@ -1,0 +1,13 @@
+/*    *_> CRTBNDCL PGM(QGPL/@4) SRCFILE(@2/@1) SRCMBR(@3) +                  */
+/*    *_>   OPTION(*EVENTF) DBGVIEW(*SOURCE)                                 */
+
+             pgm        PARM(&LIB &LEN)
+
+             DCL        VAR(&LIB) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&LEN) TYPE(*INT) LEN(4)
+
+             CRTDUPOBJ  OBJ(*ALL) FROMLIB(QTEMP) OBJTYPE(*FILE) +
+                          TOLIB(&LIB) DATA(*YES) CST(*NO) TRG(*NO)
+             MONMSG     MSGID(CPF0000)
+
+             endpgm 

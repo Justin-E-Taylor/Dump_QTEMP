@@ -1,0 +1,59 @@
+/*    *_> CRTBNDCL PGM(QGPL/@4) SRCFILE(@2/@1) SRCMBR(@3) +                  */
+/*    *_>   OPTION(*EVENTF) DBGVIEW(*SOURCE)                                 */
+
+             pgm        PARM(&Entry)
+
+             DCL        VAR(&Entry) Type(*CHAR) LEN(26)
+             DCL        VAR(&JobName) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&JobUser) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&JobNo) TYPE(*CHAR) LEN(6)
+
+             DCL        VAR(&INPUTPARM) TYPE(*CHAR) LEN(67)
+             DCL        VAR(&OFFSET) TYPE(*CHAR) LEN(4)
+             DCL        VAR(&LENGTH) TYPE(*CHAR) LEN(4)
+             DCL        VAR(&USER) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&ERROR) TYPE(*CHAR) LEN(256)
+
+             RTVJOBA    USER(&USER)
+
+             CHKOBJ     OBJ(&USER) OBJTYPE(*LIB)
+             MONMSG     MSGID(CPF9801) EXEC(CALLSUBR DUMP)
+
+             SNDPGMMSG  MSG('Library' *BCAT &USER *TCAT ' already exists, +
+                          and must be deleted in order to use this cmd.')
+             RETURN
+
+ /*--------------------------------------------------------------------------*/
+
+             SUBR       SUBR(DUMP)
+                CRTLIB     LIB(&USER) TYPE(*TEST) CRTAUT(*ALL) +
+                             CRTOBJAUD(*NONE)
+
+                CHGVAR     VAR(&JobName) VALUE(%SST(&Entry 1 10))
+                CHGVAR     VAR(&JobUser) VALUE(%SST(&Entry 11 10))
+                CHGVAR     VAR(&JobNo) VALUE(%SST(&Entry 21 6))
+                CHGVAR     %BIN(&OFFSET) VALUE(56)
+                CHGVAR     %BIN(&LENGTH) VALUE(10)
+
+                CHGVAR     %SST(&INPUTPARM 1 10) VALUE('DUMPQTEMPX')
+                CHGVAR     %SST(&INPUTPARM 11 10) VALUE('QGPL')
+                CHGVAR     %SST(&INPUTPARM 21 10) VALUE(&JobName)
+                CHGVAR     %SST(&INPUTPARM 31 10) VALUE(&JobUser)
+                CHGVAR     %SST(&INPUTPARM 41 6) VALUE(&JobNo)
+                CHGVAR     %SST(&INPUTPARM 47 2) VALUE(x'0000')
+                CHGVAR     %SST(&INPUTPARM 49 4) VALUE(&OFFSET)
+                CHGVAR     %SST(&INPUTPARM 53 4) VALUE(&LENGTH)
+                CHGVAR     %SST(&INPUTPARM 57 10) VALUE(&USER)
+
+                CALL       PGM(QWCJBITP) PARM(&INPUTPARM 'JITP0100' &ERROR)
+                IF         COND(%SST(&ERROR 9 7) *NE '       ') THEN(DO)
+                   SNDPGMMSG  MSG('Fail-' *TCAT %SST(&ERROR 9 7))
+                ENDDO
+                ELSE       CMD(DO)
+                   SNDPGMMSG  MSG('Success')
+                ENDDO
+
+                RETURN
+             ENDSUBR
+
+             endpgm 
